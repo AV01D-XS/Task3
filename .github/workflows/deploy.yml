@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, linux, x64]  # your server runner labels
+    runs-on: [self-hosted, Linux, x64]  # your server runner labels
 
     steps:
       # Optional: Checkout workflow repo (does not overwrite server files)
