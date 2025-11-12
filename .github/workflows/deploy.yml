@@ -1,0 +1,26 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Stop old containers
+        run: |
+          docker compose down || true
+
+      - name: Build and start containers
+        run: |
+          docker compose up -d --build
+
+      - name: Clean up old images
+        run: |
+          docker image prune -af || true
