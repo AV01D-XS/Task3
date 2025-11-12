@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, linux, x64]  # CORRECT lowercase labels
+    runs-on: [self-hosted, server]  # CORRECT lowercase labels
 
     steps:
       # Optional: Checkout workflow repo (does not overwrite server files)
