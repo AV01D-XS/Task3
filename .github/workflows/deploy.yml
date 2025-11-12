@@ -1,40 +1,11 @@
-name: CI/CD Pipeline
+name: Test Runner
 
-# Trigger on push to main branch or pull requests
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-  workflow_dispatch:  # optional: allows manual trigger
-  
+  workflow_dispatch:
+
 jobs:
-  deploy:
-    runs-on: [self-hosted, server]  # CORRECT lowercase labels
+  test:
+    runs-on: [self-hosted, Linux, X64]
 
     steps:
-      # Optional: Checkout workflow repo (does not overwrite server files)
-      - name: Checkout workflow repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # Debug runner info
-      - name: Runner Info
-        run: |
-          echo "Runner name: $RUNNER_NAME"
-          echo "Runner OS: $RUNNER_OS"
-          echo "Runner labels: $RUNNER_LABELS"
-
-      # Step: Deploy Docker Compose project on server
-      - name: Deploy Docker Compose
-        run: |
-          echo "Entering project path ~/ayham/project3"
-          cd ~/ayham/project3
-          echo "Stopping old containers..."
-          docker compose down || true
-          echo "Building and starting containers..."
-          docker compose up -d --build
-          echo "Cleaning up unused Docker images..."
-          docker image prune -af || true
-          echo "Deployment complete!"
-
+      - run: echo "Hello from runner $RUNNER_NAME"
