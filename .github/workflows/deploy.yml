@@ -6,21 +6,20 @@ on:
   pull_request:
 
 jobs:
-  deploy:
-    runs-on: self-hosted
+  build-and-deploy:
+    runs-on: [self-hosted, linux, x64]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Stop old containers
+      # Step 1: Build the Docker image
+      - name: Build Docker image
+        run: |
+          docker compose build
+
+      # Step 2: Deploy (stop old, start new)
+      - name: Deploy container
         run: |
           docker compose down || true
-
-      - name: Build and start containers
-        run: |
-          docker compose up -d --build
-
-      - name: Clean up old images
-        run: |
-          docker image prune -af || true
+          docker compose up -d
