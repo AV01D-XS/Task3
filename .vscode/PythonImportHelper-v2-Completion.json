@@ -1,0 +1,151 @@
+[
+    {
+        "label": "Flask",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "render_template",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "request",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "pandas",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pandas",
+        "description": "pandas",
+        "detail": "pandas",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "SentenceTransformer",
+        "importPath": "sentence_transformers",
+        "description": "sentence_transformers",
+        "isExtraImport": true,
+        "detail": "sentence_transformers",
+        "documentation": {}
+    },
+    {
+        "label": "clean_text",
+        "kind": 2,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "def clean_text(text):\n    text = re.sub(r'<.*?>', '', str(text))\n    text = re.sub(r'[^\\w\\s]', '', text)\n    return text.lower().strip()\ndf['description'] = df['description'].apply(clean_text)\n# 🧠 Load sentence transformer model\nmodel = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')\n# 💾 Generate embeddings (NumPy instead of Torch)\ndf['embeddings'] = df['description'].apply(lambda x: model.encode(x, convert_to_numpy=True))\n# 📏 Compute cosine similarity manually",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "cosine_similarity",
+        "kind": 2,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "def cosine_similarity(vec_a, vec_b):\n    dot = np.dot(vec_a, vec_b)\n    norm_a = np.linalg.norm(vec_a)\n    norm_b = np.linalg.norm(vec_b)\n    return dot / (norm_a * norm_b)\n# 🧭 Recommend places\ndef recommend_places(query, top_n=5):\n    query_emb = model.encode(query, convert_to_numpy=True)\n    scores = [cosine_similarity(query_emb, emb) for emb in df['embeddings']]\n    df['score'] = scores",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "recommend_places",
+        "kind": 2,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "def recommend_places(query, top_n=5):\n    query_emb = model.encode(query, convert_to_numpy=True)\n    scores = [cosine_similarity(query_emb, emb) for emb in df['embeddings']]\n    df['score'] = scores\n    results = df.sort_values('score', ascending=False).head(top_n)\n    return results[['Country', 'City', 'description']]\n# 🔍 Validate and handle bad input\ndef safe_recommend(query, top_n=5):\n    if not isinstance(query, str) or query.strip() == \"\":\n        return \"Please enter a valid query.\"",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "safe_recommend",
+        "kind": 2,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "def safe_recommend(query, top_n=5):\n    if not isinstance(query, str) or query.strip() == \"\":\n        return \"Please enter a valid query.\"\n    if not any(df['Country'].str.contains(query, case=False, na=False)):\n        return \"Please enter a valid country name.\"\n    return recommend_places(query, top_n)\n# 🌍 Flask routes\n@app.route(\"/\", methods=[\"GET\", \"POST\"])\ndef home():\n    results = None",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "home",
+        "kind": 2,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "def home():\n    results = None\n    message = \"\"\n    if request.method == \"POST\":\n        query = request.form.get(\"country\", \"\")\n        output = safe_recommend(query, top_n=5)\n        if isinstance(output, str):  \n            message = output\n        else:\n            results = output.values.tolist()  ",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "app = Flask(__name__)\n# ✅ Corrected dataset path\ndf = pd.read_csv(\"/home/ai/Project-3A/travel_destinations_updated.csv\")\n# 🧹 Clean text\ndef clean_text(text):\n    text = re.sub(r'<.*?>', '', str(text))\n    text = re.sub(r'[^\\w\\s]', '', text)\n    return text.lower().strip()\ndf['description'] = df['description'].apply(clean_text)\n# 🧠 Load sentence transformer model",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "df",
+        "kind": 5,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "df = pd.read_csv(\"/home/ai/Project-3A/travel_destinations_updated.csv\")\n# 🧹 Clean text\ndef clean_text(text):\n    text = re.sub(r'<.*?>', '', str(text))\n    text = re.sub(r'[^\\w\\s]', '', text)\n    return text.lower().strip()\ndf['description'] = df['description'].apply(clean_text)\n# 🧠 Load sentence transformer model\nmodel = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')\n# 💾 Generate embeddings (NumPy instead of Torch)",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "df['description']",
+        "kind": 5,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "df['description'] = df['description'].apply(clean_text)\n# 🧠 Load sentence transformer model\nmodel = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')\n# 💾 Generate embeddings (NumPy instead of Torch)\ndf['embeddings'] = df['description'].apply(lambda x: model.encode(x, convert_to_numpy=True))\n# 📏 Compute cosine similarity manually\ndef cosine_similarity(vec_a, vec_b):\n    dot = np.dot(vec_a, vec_b)\n    norm_a = np.linalg.norm(vec_a)\n    norm_b = np.linalg.norm(vec_b)",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "model",
+        "kind": 5,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')\n# 💾 Generate embeddings (NumPy instead of Torch)\ndf['embeddings'] = df['description'].apply(lambda x: model.encode(x, convert_to_numpy=True))\n# 📏 Compute cosine similarity manually\ndef cosine_similarity(vec_a, vec_b):\n    dot = np.dot(vec_a, vec_b)\n    norm_a = np.linalg.norm(vec_a)\n    norm_b = np.linalg.norm(vec_b)\n    return dot / (norm_a * norm_b)\n# 🧭 Recommend places",
+        "detail": "project3",
+        "documentation": {}
+    },
+    {
+        "label": "df['embeddings']",
+        "kind": 5,
+        "importPath": "project3",
+        "description": "project3",
+        "peekOfCode": "df['embeddings'] = df['description'].apply(lambda x: model.encode(x, convert_to_numpy=True))\n# 📏 Compute cosine similarity manually\ndef cosine_similarity(vec_a, vec_b):\n    dot = np.dot(vec_a, vec_b)\n    norm_a = np.linalg.norm(vec_a)\n    norm_b = np.linalg.norm(vec_b)\n    return dot / (norm_a * norm_b)\n# 🧭 Recommend places\ndef recommend_places(query, top_n=5):\n    query_emb = model.encode(query, convert_to_numpy=True)",
+        "detail": "project3",
+        "documentation": {}
+    }
+]

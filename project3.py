@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import re
-from sentence_transformers import SentenceTransformer, util
-import torch
+import numpy as np
+from sentence_transformers import SentenceTransformer
 
 app = Flask(__name__)
 
-df = pd.read_csv("/home/ai/project_3/travel_destinations_updated.csv")
+# ✅ Corrected dataset path
+df = pd.read_csv("/home/ai/Project-3A/travel_destinations_updated.csv")
 
+# 🧹 Clean text
 def clean_text(text):
     text = re.sub(r'<.*?>', '', str(text))
     text = re.sub(r'[^\w\s]', '', text)
@@ -15,17 +17,28 @@ def clean_text(text):
 
 df['description'] = df['description'].apply(clean_text)
 
+# 🧠 Load sentence transformer model
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-df['embeddings'] = df['description'].apply(lambda x: model.encode(x, convert_to_tensor=True))
+# 💾 Generate embeddings (NumPy instead of Torch)
+df['embeddings'] = df['description'].apply(lambda x: model.encode(x, convert_to_numpy=True))
 
+# 📏 Compute cosine similarity manually
+def cosine_similarity(vec_a, vec_b):
+    dot = np.dot(vec_a, vec_b)
+    norm_a = np.linalg.norm(vec_a)
+    norm_b = np.linalg.norm(vec_b)
+    return dot / (norm_a * norm_b)
+
+# 🧭 Recommend places
 def recommend_places(query, top_n=5):
-    query_emb = model.encode(query, convert_to_tensor=True)
-    scores = [util.cos_sim(query_emb, emb).item() for emb in df['embeddings']]
+    query_emb = model.encode(query, convert_to_numpy=True)
+    scores = [cosine_similarity(query_emb, emb) for emb in df['embeddings']]
     df['score'] = scores
     results = df.sort_values('score', ascending=False).head(top_n)
     return results[['Country', 'City', 'description']]
 
+# 🔍 Validate and handle bad input
 def safe_recommend(query, top_n=5):
     if not isinstance(query, str) or query.strip() == "":
         return "Please enter a valid query."
@@ -35,6 +48,7 @@ def safe_recommend(query, top_n=5):
     
     return recommend_places(query, top_n)
 
+# 🌍 Flask routes
 @app.route("/", methods=["GET", "POST"])
 def home():
     results = None
