@@ -1,25 +1,31 @@
 name: CI/CD Pipeline
 
+# Trigger on push to main branch or pull requests
 on:
   push:
     branches: [ main ]
   pull_request:
 
 jobs:
-  build-and-deploy:
-    runs-on: [self-hosted, linux, x64]
+  deploy:
+    runs-on: [self-hosted, linux, x64]  # your server runner labels
 
     steps:
-      - name: Checkout code
+      # Optional: Checkout workflow repo (does not overwrite server files)
+      - name: Checkout workflow repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # Step 1: Build the Docker image
-      - name: Build Docker image
+      # Step: Deploy Docker Compose project on server
+      - name: Deploy Docker Compose
         run: |
-          docker compose build
-
-      # Step 2: Deploy (stop old, start new)
-      - name: Deploy container
-        run: |
+          echo "Entering project path ~/ayham/project3"
+          cd ~/ayham/project3
+          echo "Stopping old containers..."
           docker compose down || true
-          docker compose up -d
+          echo "Building and starting containers..."
+          docker compose up -d --build
+          echo "Cleaning up unused Docker images..."
+          docker image prune -af || true
+          echo "Deployment complete!"
